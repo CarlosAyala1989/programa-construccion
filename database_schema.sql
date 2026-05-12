@@ -57,6 +57,7 @@ CREATE TABLE IF NOT EXISTS `SecurityPolicy` (
   `target` VARCHAR(191) NOT NULL,
   `password` VARCHAR(191) NOT NULL,
   `priority` INTEGER NOT NULL DEFAULT 0,
+  `workspaceId` VARCHAR(191) NULL,
   `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
   `updatedAt` DATETIME(3) NOT NULL,
   PRIMARY KEY (`id`)
@@ -68,10 +69,41 @@ CREATE TABLE IF NOT EXISTS `SecurityPolicy` (
 CREATE TABLE IF NOT EXISTS `AuditLog` (
   `id` VARCHAR(191) NOT NULL,
   `userId` VARCHAR(191) NULL,
+  `userName` VARCHAR(191) NULL,
   `action` VARCHAR(191) NOT NULL,
-  `details` VARCHAR(191) NOT NULL,
+  `details` TEXT NOT NULL,
   `status` VARCHAR(191) NOT NULL,
+  `workspaceId` VARCHAR(191) NULL,
   `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- -----------------------------------------------------
+-- Tabla: Config (Configuración Global del Sistema)
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `Config` (
+  `id` VARCHAR(191) NOT NULL,
+  `compressionEnabled` BOOLEAN NOT NULL DEFAULT 0,
+  `compressionThresholdMb` INTEGER NOT NULL DEFAULT 10,
+  `deleteLocalAfterUpload` BOOLEAN NOT NULL DEFAULT 0,
+  `cloudProvider` VARCHAR(191) NOT NULL DEFAULT 'MANUAL',
+  `cloudCredentials` TEXT NULL,
+  `updatedAt` DATETIME(3) NOT NULL,
+  `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- -----------------------------------------------------
+-- Tabla: NomenclatureField (Campos de Nomenclatura)
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `NomenclatureField` (
+  `id` VARCHAR(191) NOT NULL,
+  `fieldName` VARCHAR(191) NOT NULL,
+  `fieldOrder` INTEGER NOT NULL DEFAULT 0,
+  `isRequired` BOOLEAN NOT NULL DEFAULT 1,
+  `separator` VARCHAR(10) NOT NULL DEFAULT '_',
+  `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  `updatedAt` DATETIME(3) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -89,3 +121,10 @@ VALUES (
   1, 
   CURRENT_TIMESTAMP(3)
 ) ON DUPLICATE KEY UPDATE `email` = `email`;
+
+-- -----------------------------------------------------
+-- Inserción de Configuración por Defecto
+-- -----------------------------------------------------
+INSERT INTO `Config` (`id`, `compressionEnabled`, `compressionThresholdMb`, `deleteLocalAfterUpload`, `cloudProvider`, `updatedAt`)
+VALUES ('default-config-1', 0, 10, 0, 'MANUAL', CURRENT_TIMESTAMP(3))
+ON DUPLICATE KEY UPDATE `id` = `id`;
