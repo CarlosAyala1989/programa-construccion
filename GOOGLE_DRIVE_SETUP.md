@@ -1,46 +1,78 @@
-# Configuración de Google Drive Picker API
+# Configuración de Google Drive para la Plataforma
 
-Para que el selector de carpetas de Google Drive funcione en el panel del administrador, necesitas configurar un proyecto en Google Cloud y obtener las credenciales.
+## Pasos para configurar la integración con Google Drive
 
-## Pasos a seguir:
+### 1. Crear un Proyecto en Google Cloud Console
 
-1. **Crear un Proyecto en Google Cloud:**
-   - Ve a la [Consola de Google Cloud](https://console.cloud.google.com/).
-   - Crea un nuevo proyecto (ej. `Gobernanza Documental`).
+1. Ve a [Google Cloud Console](https://console.cloud.google.com/)
+2. Crea un nuevo proyecto (o selecciona uno existente)
+3. Dale un nombre descriptivo, ej: "Gobernanza Documental"
 
-2. **Habilitar la API de Google Drive:**
-   - En el menú izquierdo, ve a **APIs & Services** > **Library**.
-   - Busca `Google Drive API` y haz clic en **Habilitar** (Enable).
+### 2. Habilitar la API de Google Drive
 
-3. **Configurar la Pantalla de Consentimiento OAuth:**
-   - Ve a **APIs & Services** > **OAuth consent screen**.
-   - Selecciona **Externo** o **Interno** (Interno es recomendado si usas Google Workspace de empresa).
-   - Rellena el Nombre de la App, Correo de soporte, y añade los scopes: `.../auth/drive.readonly` o `.../auth/drive`.
-   - Guarda los cambios.
+1. En el menú lateral, ve a **APIs & Services** > **Library**
+2. Busca **Google Drive API**
+3. Haz clic en **Enable**
 
-4. **Crear Credenciales (Client ID):**
-   - Ve a **APIs & Services** > **Credentials**.
-   - Clic en **Create Credentials** > **OAuth client ID**.
-   - Tipo de aplicación: **Web application**.
-   - En **Authorized JavaScript origins**, añade: `http://localhost:3000` (y tu dominio en producción).
-   - Crea y copia el **Client ID**.
+### 3. Configurar la Pantalla de Consentimiento OAuth
 
-5. **Crear API Key:**
-   - En la misma página de Credentials, haz clic en **Create Credentials** > **API key**.
-   - Copia la **API Key**.
+1. Ve a **APIs & Services** > **OAuth consent screen**
+2. Selecciona **External** (a menos que tengas Google Workspace)
+3. Llena los campos requeridos:
+   - **App name**: Gobernanza Documental
+   - **User support email**: tu correo
+   - **Developer contact**: tu correo
+4. En **Scopes**, agrega:
+   - `https://www.googleapis.com/auth/drive.file`
+   - `https://www.googleapis.com/auth/drive.readonly`
+5. En **Test users**, agrega los correos de las cuentas que usarán el sistema
 
-6. **Obtener el App ID:**
-   - El App ID es el primer número (antes del guion) que aparece en tu Client ID. 
-   - Por ejemplo, si tu Client ID es `123456789-abcdefg.apps.googleusercontent.com`, tu App ID es `123456789`.
+### 4. Crear Credenciales OAuth 2.0
 
-## Configuración en el Código
+1. Ve a **APIs & Services** > **Credentials**
+2. Haz clic en **Create Credentials** > **OAuth client ID**
+3. Selecciona **Web application**
+4. Configura:
+   - **Name**: Gobernanza Web Client
+   - **Authorized JavaScript origins**: 
+     - `http://localhost:3000` (desarrollo)
+     - `https://tu-dominio.com` (producción)
+   - **Authorized redirect URIs**:
+     - `http://localhost:3000` (desarrollo)
+5. Copia el **Client ID** generado
 
-Crea un archivo llamado `.env.local` en la carpeta `construccion-web/` y añade tus credenciales:
+### 5. Configurar en el Proyecto
+
+Agrega la siguiente variable al archivo `construccion-web/.env`:
 
 ```env
-NEXT_PUBLIC_GOOGLE_API_KEY="TU_API_KEY_AQUI"
 NEXT_PUBLIC_GOOGLE_CLIENT_ID="TU_CLIENT_ID_AQUI.apps.googleusercontent.com"
-NEXT_PUBLIC_GOOGLE_APP_ID="TU_APP_ID_AQUI"
 ```
 
-Reinicia el servidor de Next.js (`npm run dev`) y el selector de Google Drive estará funcional.
+### 6. Reiniciar el Servidor
+
+```bash
+cd construccion-web
+npm run dev
+```
+
+## ¿Cómo funciona?
+
+1. El administrador va a **Espacios de Trabajo** en el dashboard
+2. Hace clic en **📁 Elegir Carpeta** > pestaña **☁️ Google Drive**
+3. Hace clic en **Explorar Google Drive** → se abre el navegador de carpetas
+4. Inicia sesión con su cuenta de Google (solo la primera vez)
+5. **Navega** por sus carpetas de Drive (clic = seleccionar, doble clic = abrir)
+6. Puede **crear nuevas carpetas** desde la misma interfaz
+7. Selecciona la carpeta destino → el sistema guarda el ID y la ruta
+8. El programa de escritorio usará esa carpeta para subir los PDFs encriptados
+
+## Flujo de seguridad
+
+```
+Documento → OCR → Políticas de Seguridad → Encriptación con contraseña → Google Drive
+                                                                    o → Carpeta Local
+                                                                    o → Dropbox
+```
+
+Los PDFs **siempre se encriptan antes** de subirse, independientemente del destino elegido.
