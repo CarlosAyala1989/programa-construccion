@@ -39,40 +39,74 @@
      - `https://tu-dominio.com` (producción)
    - **Authorized redirect URIs**:
      - `http://localhost:3000` (desarrollo)
-5. Copia el **Client ID** generado
+5. Copia el **Client ID** y el **Client Secret** generados
 
 ### 5. Configurar en el Proyecto
 
-Agrega la siguiente variable al archivo `construccion-web/.env`:
+Agrega las siguientes variables al archivo `construccion-web/.env`:
 
 ```env
-NEXT_PUBLIC_GOOGLE_CLIENT_ID="TU_CLIENT_ID_AQUI.apps.googleusercontent.com"
+NEXT_PUBLIC_GOOGLE_CLIENT_ID="TU_CLIENT_ID.apps.googleusercontent.com"
+GOOGLE_CLIENT_SECRET="TU_CLIENT_SECRET"
 ```
 
-### 6. Reiniciar el Servidor
+> **Importante**: El `GOOGLE_CLIENT_SECRET` se usa en el servidor para obtener un `refresh_token`, que es necesario para que el programa de escritorio pueda subir archivos sin necesidad de que el usuario inicie sesión en Google cada vez.
+
+### 6. Configurar credenciales en la Web Admin (opcional)
+
+Para que el escritorio pueda refrescar tokens automáticamente, ve a **Configuración** en el dashboard web y guarda las credenciales de Google en el campo `cloudCredentials` como JSON:
+
+```json
+{
+  "clientId": "TU_CLIENT_ID.apps.googleusercontent.com",
+  "clientSecret": "TU_CLIENT_SECRET"
+}
+```
+
+### 7. Reiniciar el Servidor
 
 ```bash
 cd construccion-web
 npm run dev
 ```
 
-## ¿Cómo funciona?
+## Flujo Completo
 
-1. El administrador va a **Espacios de Trabajo** en el dashboard
-2. Hace clic en **📁 Elegir Carpeta** > pestaña **☁️ Google Drive**
-3. Hace clic en **Explorar Google Drive** → se abre el navegador de carpetas
-4. Inicia sesión con su cuenta de Google (solo la primera vez)
-5. **Navega** por sus carpetas de Drive (clic = seleccionar, doble clic = abrir)
-6. Puede **crear nuevas carpetas** desde la misma interfaz
-7. Selecciona la carpeta destino → el sistema guarda el ID y la ruta
-8. El programa de escritorio usará esa carpeta para subir los PDFs encriptados
+### Admin (Web):
+1. Va a **Espacios de Trabajo** > clic en **📁 Elegir Carpeta** > pestaña **☁️ Google Drive**
+2. Clic en **Explorar Google Drive** → Popup de login de Google
+3. Navega sus carpetas, crea nuevas si es necesario
+4. Selecciona la carpeta destino → se guarda:
+   - `cloudPath`: La ruta legible (ej: "Google Drive: /Empresa/RRHH")
+   - `cloudFolderId`: El ID de la carpeta en Drive (usado por la API)
+   - `cloudRefreshToken`: El token de larga duración para subir archivos
+
+### Escritorio (Desktop):
+1. El empleado inicia sesión con sus credenciales
+2. Selecciona su espacio de trabajo (que ya tiene el `cloudFolderId` y `cloudRefreshToken` configurados)
+3. Escanea/importa documentos → se procesan (OCR, encriptación)
+4. Al cerrar la sesión:
+   - Se usa el `cloudRefreshToken` para obtener un `access_token` fresco
+   - Se sube cada documento procesado a la carpeta `cloudFolderId` de Drive
+   - **Sin necesidad de que el empleado inicie sesión en Google**
 
 ## Flujo de seguridad
 
 ```
-Documento → OCR → Políticas de Seguridad → Encriptación con contraseña → Google Drive
+Documento → OCR → Políticas de Seguridad → Encriptación con contraseña → Upload a Drive (via refresh_token)
                                                                     o → Carpeta Local
                                                                     o → Dropbox
 ```
 
-Los PDFs **siempre se encriptan antes** de subirse, independientemente del destino elegido.
+Los PDFs **siempre se encriptan antes** de subirse, independientemente del destino.
+
+## Solución de Problemas
+
+### "No se obtuvo refresh_token"
+Google solo devuelve el `refresh_token` la **primera vez** que el usuario autoriza la app. Si ya la autorizó antes:
+1. Ve a [myaccount.google.com/permissions](https://myaccount.google.com/permissions)
+2. Revoca el acceso a "Gobernanza Documental"
+3. Vuelve a vincular la carpeta desde la web
+
+### "Token refresh failed"
+Asegúrate de que el `GOOGLE_CLIENT_SECRET` esté configurado correctamente tanto en el `.env` del servidor como en la tabla `Config.cloudCredentials`.
