@@ -1,0 +1,41 @@
+Requerimientos funcionales
+1. RF-01 — Creación de Perfiles de Usuario
+   Solo el administrador puede crear usuarios; no existe auto-registro.
+2. RF-02 — Desactivación Lógica de Cuenta
+   Permite desactivar una cuenta mediante Soft Delete sin eliminarla físicamente, conservando su historial y trazabilidad.
+3. RF-03 — Bloqueo de Interfaz Local
+   El cliente de escritorio permanece bloqueado hasta que el operador seleccione un espacio de trabajo válido.
+4. RF-04 — Directorio Temporal Cifrado
+   Crea un almacenamiento temporal local cifrado para los documentos que se encuentran en procesamiento.
+5. RF-05 — Pausa por Atasco Mecánico
+   Ante un atasco o fallo del escáner, el proceso se pausa sin perder los documentos o folios ya procesados.
+6. RF-06 — Procesamiento OCR y Extracción
+   El motor OCR analiza los documentos digitalizados y extrae automáticamente los metadatos definidos.
+7. RF-07 — Renombrado y Estructuración de Carpetas
+   Los documentos se renombran automáticamente y se organizan en carpetas según los metadatos obtenidos.
+8. RF-08 — Derivación a Bandeja de Pendientes
+   Los documentos con problemas de lectura, extracción o validación son enviados a una bandeja para revisión manual.
+9. RF-09 — Aplicación de Contraseña Predeterminada
+   Todo documento que no active una política más restrictiva recibe automáticamente la contraseña base correspondiente al espacio de trabajo.
+10. RF-10 — Resolución Jerárquica de Reglas
+    Cuando existen reglas en conflicto, las reglas detectadas mediante Visión Artificial tienen prioridad sobre las obtenidas mediante OCR.
+11. RF-11 — Re-evaluación Obligatoria (Correcciones)
+    Todo documento corregido desde la Bandeja de Pendientes debe pasar nuevamente por el motor de IA y seguridad antes de poder ser enviado.
+12. RF-12 — Encolado de Archivos Offline
+    Si no existe conexión a Internet, los documentos cifrados quedan almacenados en una cola pendiente para su posterior envío.
+13. RF-13 — Sincronización Automática (Conexión)
+    Cuando se recupera la conexión, el sistema inicia automáticamente y en segundo plano el envío de los documentos pendientes.
+14. RF-14 — Prevención de Colisiones de Archivos
+    El sistema evita sobrescribir documentos existentes; ante nombres duplicados agrega sufijos como _v2, _v3, etc.
+15. RF-15 — Compresión PDF Opcional
+    Los archivos que superen el umbral configurado pueden comprimirse antes de ser enviados a la nube.
+16. RF-16 — Logs Cifrados Offline
+    Las acciones realizadas durante el funcionamiento sin conexión se registran localmente en bitácoras cifradas.
+17. RF-17 — Sincronización de Logs de Auditoría
+    Cuando regresa la conectividad, los logs locales acumulados son enviados al servidor SaaS para consolidar la auditoría.
+18. RF-18 — Visualización Web Segura de PDF Protegido
+    Los usuarios WEB_VIEWER y los administradores autorizados pueden visualizar PDFs protegidos desde el SaaS sin que la contraseña documental sea expuesta al navegador. El servidor valida permisos y renderiza las páginas antes de entregarlas al cliente.
+19. RF-19 — Autenticación Web Reforzada
+    El inicio de sesión web exige CAPTCHA y, cuando corresponda por cuenta o política, un código temporal de Authenticator/TOTP.
+20. RF-20 — Carga Web Segura de PDF Protegido
+    El administrador puede cargar PDFs desde el panel web y el sistema debe protegerlos mediante cifrado antes de almacenarlos en el repositorio autorizado.
